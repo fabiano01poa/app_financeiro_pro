@@ -1,0 +1,42 @@
+{
+  "entities": {
+    "Transaction": {
+      "title": "Transação",
+      "description": "Uma entrada ou saída financeira",
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "type": { "type": "string", "enum": ["income", "expense"] },
+        "category": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" }
+      },
+      "required": ["description", "amount", "type", "category", "date", "userId"]
+    },
+    "Account": {
+      "title": "Conta",
+      "description": "Uma conta fixa ou variável recorrente",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "expectedAmount": { "type": "number" },
+        "dueDate": { "type": "number" },
+        "status": { "type": "string", "enum": ["paid", "pending"] },
+        "type": { "type": "string", "enum": ["fixed", "variable"] },
+        "userId": { "type": "string" }
+      },
+      "required": ["name", "expectedAmount", "dueDate", "status", "type", "userId"]
+    }
+  },
+  "firestore": {
+    "/transactions": {
+      "schema": { "$ref": "entities/Transaction" },
+      "description": "Coleção global de transações"
+    },
+    "/accounts": {
+      "schema": { "$ref": "entities/Account" },
+      "description": "Coleção de contas fixas e variáveis"
+    }
+  }
+}
