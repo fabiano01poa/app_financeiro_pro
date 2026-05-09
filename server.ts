@@ -24,6 +24,20 @@ function getSheetsClient() {
 
   // Sanitize the key: handle literal \n, quotes, and missing headers
   try {
+    key = key.trim();
+    
+    // Check if user accidentally pasted the entire JSON object
+    if (key.includes('private_key') && key.includes('{') && key.includes('}')) {
+      try {
+        const json = JSON.parse(key);
+        if (json.private_key) {
+          key = json.private_key;
+        }
+      } catch (e) {
+        // Not valid JSON, continue with normal sanitization
+      }
+    }
+
     // 1. Remove wrapping quotes if present
     key = key.trim();
     if (key.startsWith('"') && key.endsWith('"')) {
@@ -34,19 +48,25 @@ function getSheetsClient() {
     }
 
     // 2. Replace escaped newlines with actual newlines
-    // We handle both \n and \\n just in case
     key = key.replace(/\\n/g, '\n');
 
-    // 3. If it doesn't look like a PEM yet, try to reconstruct it
+    // 3. Remove any literal "\n" strings that might have been pasted as text
+    key = key.split('\n').map(line => line.trim()).join('\n');
+
+    // 4. If it doesn't look like a PEM yet, try to reconstruct it
     if (!key.includes("-----BEGIN PRIVATE KEY-----")) {
-      // Sometimes the key is just the base64 part
-      key = `-----BEGIN PRIVATE KEY-----\n${key}\n-----END PRIVATE KEY-----`;
+      // Ensure it's just the base64 part, removing any extra whitespace
+      const base64Part = key.replace(/[^A-Za-z0-9+/=]/g, '');
+      key = `-----BEGIN PRIVATE KEY-----\n${base64Part}\n-----END PRIVATE KEY-----`;
     }
 
-    // 4. Final check for internal spaces that should maybe be newlines (common pasting error)
-    // But be careful not to break valid base64
-    // Usually, PEM keys have newlines every 64 chars, but Node's crypto is okay with one long line
-    // as long as the headers are there.
+    // Double check the headers have newlines after them
+    if (key.includes("-----BEGIN PRIVATE KEY-----") && !key.includes("-----BEGIN PRIVATE KEY-----\n")) {
+      key = key.replace("-----BEGIN PRIVATE KEY-----", "-----BEGIN PRIVATE KEY-----\n");
+    }
+    if (key.includes("-----END PRIVATE KEY-----") && !key.includes("\n-----END PRIVATE KEY-----")) {
+      key = key.replace("-----END PRIVATE KEY-----", "\n-----END PRIVATE KEY-----");
+    }
 
     const auth = new JWT({
       email,
@@ -55,8 +75,8 @@ function getSheetsClient() {
     });
 
     return google.sheets({ version: "v4", auth });
-  } catch (error) {
-    console.error("Error creating Google Sheets client:", error);
+  } catch (error: any) {
+    console.error("Error creating Google Sheets client:", error.message);
     return null;
   }
 }
@@ -81,7 +101,10 @@ app.get("/api/data", async (req, res) => {
       spreadsheetId: SPREADSHEET_ID,
       ranges: ["Transactions!A:Z", "FixedAccounts!A:Z", "Categories!A:Z"],
     }).catch(err => {
-      // Re-throw with a more descriptive message if it's a 400 error (likely range not found)
+      // Re-throw with a more descriptive message if it's a 400/404 error
+      if (err.code === 404) {
+        throw new Error(`Planilha não encontrada. Verifique se o VITE_SPREADSHEET_ID (${SPREADSHEET_ID}) está correto e se o e-mail da conta de serviço foi convidado para a planilha.`);
+      }
       if (err.code === 400) {
         throw new Error(`Intervalo ou Aba não encontrada. Certifique-se de que sua planilha tem as abas: 'Transactions', 'FixedAccounts' e 'Categories'.`);
       }

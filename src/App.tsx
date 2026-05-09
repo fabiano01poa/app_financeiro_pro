@@ -113,8 +113,8 @@ const Dashboard = ({ transactions, accounts }: { transactions: Transaction[], ac
               </div>
             </div>
           </div>
-          <div className="p-6 h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="p-6 h-[300px] w-full min-h-[300px] relative">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
               <BarChart data={MOCK_MONTHLY_DATA} barGap={8}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis 
@@ -524,27 +524,36 @@ export default function App() {
             <div className="space-y-4 text-slate-600 text-sm leading-relaxed">
               {syncError !== 'CREDENTIALS_MISSING' && (
                 <div className="bg-rose-50 p-4 rounded-xl border border-rose-100 mb-4">
-                  <p className="text-rose-700 font-bold mb-1">Mensagem do Servidor:</p>
+                  <p className="text-rose-700 font-bold mb-1">Diagnóstico:</p>
                   <p className="text-rose-600 text-xs font-mono">{syncError}</p>
                 </div>
               )}
 
-              <p className="font-bold text-slate-800">Verifique os seguintes pontos:</p>
+              <p className="font-bold text-slate-800">Como corrigir:</p>
               
-              <ul className="list-disc list-inside space-y-3 font-medium">
-                <li>Sua planilha <b>DEVE</b> ter exatamente estas abas (nomes em inglês):
+              <ul className="list-decimal list-inside space-y-4 font-medium text-slate-700">
+                <li className="p-4 bg-rose-50 border border-rose-100 rounded-2xl">
+                   <b className="text-rose-700">Atenção à imagem que você enviou:</b> Você copiou o <b>ID DA CHAVE</b> (o código curto na tabela). Isso está <b>ERRADO</b>.
+                   <br/><br/>
+                   <span className="text-xs">O que fazer: Clique no botão <b className="bg-slate-200 px-1 rounded">Adicionar Chave</b> &gt; <b className="bg-slate-200 px-1 rounded">Criar nova chave</b> &gt; Escolha <b>JSON</b>. Um arquivo será baixado.</span>
+                </li>
+                <li>
+                   <b>Passo 2:</b> Abra esse arquivo baixado no seu computador e copie TODO o conteúdo (o texto que começa com <code className="bg-slate-100 px-1 rounded">{'{'}</code>).
+                </li>
+                <li>
+                   <b>Passo 3:</b> No applet, vá em <b>Settings</b> &gt; adicione <code className="bg-slate-100 px-1 rounded">GOOGLE_PRIVATE_KEY</code> e cole o conteúdo que você copiou.
+                </li>
+                <li>
+                  <b>Passo 4:</b> Certifique-se de que convidou o e-mail que está em <code className="bg-slate-100 px-1 rounded">client_email</code> dentro do JSON (ele termina em <code className="bg-slate-100 px-1 rounded">.iam.gserviceaccount.com</code>) para ser <b>Editor</b> na sua planilha.
+                </li>
+                <li>
+                  Sua planilha <b>PRECISA</b> ter abas com estes nomes:
                   <div className="flex gap-2 mt-2">
                     <span className="bg-slate-100 px-2 py-1 rounded text-[10px] font-mono border border-slate-200">Transactions</span>
                     <span className="bg-slate-100 px-2 py-1 rounded text-[10px] font-mono border border-slate-200">FixedAccounts</span>
                     <span className="bg-slate-100 px-2 py-1 rounded text-[10px] font-mono border border-slate-200">Categories</span>
                   </div>
                 </li>
-                {syncError === 'CREDENTIALS_MISSING' && (
-                  <>
-                    <li>Compartilhe sua planilha com o e-mail da <b>Service Account</b>.</li>
-                    <li>No menu <b>Settings</b>, adicione <code className="bg-slate-100 px-1 rounded">GOOGLE_PRIVATE_KEY</code> e <code className="bg-slate-100 px-1 rounded">GOOGLE_SERVICE_ACCOUNT_EMAIL</code>.</li>
-                  </>
-                )}
               </ul>
 
               <button 
