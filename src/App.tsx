@@ -543,8 +543,18 @@ export default function App() {
                 <li>
                    <b>Passo 3:</b> No applet, vá em <b>Settings</b> &gt; adicione <code className="bg-slate-100 px-1 rounded">GOOGLE_PRIVATE_KEY</code> e cole o conteúdo que você copiou.
                 </li>
+                <li className="p-4 bg-blue-50 border border-blue-100 rounded-2xl">
+                  <b>Passo 4: Verifique o ID da Planilha:</b><br/>
+                  Confira se o código na URL da sua planilha é EXATAMENTE:<br/>
+                  <code className="block mt-2 bg-white p-2 rounded border border-blue-200 text-blue-700 font-mono text-[10px] break-all">
+                    {import.meta.env.VITE_SPREADSHEET_ID || "NÃO CONFIGURADO"}
+                  </code>
+                  <span className="text-[10px] text-blue-600 block mt-1 italic leading-tight">
+                    Se for diferente, você precisa atualizar a variável <b>VITE_SPREADSHEET_ID</b> nas Settings.
+                  </span>
+                </li>
                 <li>
-                  <b>Passo 4:</b> Certifique-se de que convidou o e-mail que está em <code className="bg-slate-100 px-1 rounded">client_email</code> dentro do JSON (ele termina em <code className="bg-slate-100 px-1 rounded">.iam.gserviceaccount.com</code>) para ser <b>Editor</b> na sua planilha.
+                  <b>Passo 5:</b> Certifique-se de que convidou o e-mail que está em <code className="bg-slate-100 px-1 rounded">client_email</code> dentro do JSON para ser <b>Editor</b> na sua planilha.
                 </li>
                 <li>
                   Sua planilha <b>PRECISA</b> ter abas com estes nomes:
